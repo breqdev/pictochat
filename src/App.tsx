@@ -11,11 +11,8 @@ function App() {
 
   const socket = React.useRef<WebSocket>();
 
-  React.useEffect(() => {
-    if (!socket.current) {
-      socket.current = new WebSocket("wss://chat.breq.dev/socket");
-    }
-
+  const initSocket = () => {
+    socket.current = new WebSocket("wss://chat.breq.dev/socket");
     socket.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setMessages((messages) => [...messages, data]);
@@ -23,9 +20,15 @@ function App() {
 
     socket.current.onclose = () => {
       setTimeout(() => {
-        socket.current = new WebSocket("wss://chat.breq.dev/socket");
+        initSocket();
       }, 500);
     };
+  };
+
+  React.useEffect(() => {
+    if (!socket.current) {
+      initSocket();
+    }
   }, []);
 
   const handleMessage = React.useCallback((message: MessageData) => {
