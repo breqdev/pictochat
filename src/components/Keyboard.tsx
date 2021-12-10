@@ -4,7 +4,7 @@ import {
   faLevelDownAlt,
   faLongArrowAltLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { ComposeEvent, ComposeEventDispatcher } from "./MessageCompose";
+import { ComposeEventDispatcher } from "./MessageCompose";
 
 const KEYS = [
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
@@ -54,6 +54,7 @@ export default function Keyboard({
             e.dataTransfer.setData("text/plain", key);
             e.dataTransfer.effectAllowed = "move";
           }}
+          key={key}
         >
           {key}
         </button>
@@ -71,6 +72,7 @@ export default function Keyboard({
             setShifted(!shifted);
             setCaps(false);
           }}
+          key={key}
         >
           {key}
         </button>
@@ -86,6 +88,7 @@ export default function Keyboard({
             setCaps(!caps);
             setShifted(false);
           }}
+          key={key}
         >
           {key}
         </button>
@@ -95,6 +98,7 @@ export default function Keyboard({
         <button
           className="bg-gray-400 text-gray-700 text-2xl h-8 flex-grow"
           onClick={makeDispatch(key)}
+          key={key}
         >
           <FontAwesomeIcon icon={faLongArrowAltLeft} />
         </button>
@@ -104,6 +108,7 @@ export default function Keyboard({
         <button
           className="bg-gray-400 font-bold text-gray-700 h-8 flex-grow uppercase text-xs"
           onClick={makeDispatch("\n")}
+          key={key}
         >
           <FontAwesomeIcon
             className="transform rotate-90 scale-y-75 scale-x-125 mr-2 text-xs"
@@ -117,6 +122,7 @@ export default function Keyboard({
         <button
           className="bg-gray-400 font-bold text-gray-700 h-8 flex-grow uppercase text-sm"
           onClick={makeDispatch(" ")}
+          key={key}
         >
           {key}
         </button>

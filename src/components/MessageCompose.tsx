@@ -10,6 +10,7 @@ type ComposeKeyEvent = {
 export type ComposeEvent =
   | { type: "clear" }
   | { type: "send" }
+  | { type: "copy" }
   | ComposeKeyEvent;
 
 export type ComposeEventDispatcher = React.MutableRefObject<
@@ -36,14 +37,18 @@ const usePersistentCanvas = (
 
     canvasParent.current?.appendChild(canvas.current);
 
+    const canvasParentElement = canvasParent.current;
+    const canvasRefElement = canvas.current;
     return () => {
-      canvasParent.current?.removeChild(canvas.current!);
+      canvasParentElement?.removeChild(canvasRefElement);
     };
-  }, []);
+  }, [canvasParent, pointerEvents, zIndex]);
 
   React.useLayoutEffect(() => {
-    canvas.current!.width = canvas.current!.offsetWidth;
-    canvas.current!.height = canvas.current!.offsetHeight;
+    if (canvas.current) {
+      canvas.current.width = canvas.current.offsetWidth;
+      canvas.current.height = canvas.current.offsetHeight;
+    }
   }, []);
 
   return canvas;
@@ -55,96 +60,109 @@ const useCanvasMouseEvents = (
 ) => {
   const mouseDown = React.useRef(false);
 
-  const handleMouseDown = (e: MouseEvent) => {
-    mouseDown.current = true;
-    const ctx = canvas.current?.getContext("2d");
-    if (!ctx) return;
+  const handleMouseDown = React.useCallback(
+    (e: MouseEvent) => {
+      mouseDown.current = true;
+      const ctx = canvas.current?.getContext("2d");
+      if (!canvas.current || !ctx) return;
 
-    ctx.beginPath();
-    const rect = canvas.current!.getBoundingClientRect();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-  };
+      ctx.beginPath();
+      const rect = canvas.current.getBoundingClientRect();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    },
+    [canvas]
+  );
 
-  const handleMouseUp = () => {
+  const handleMouseUp = React.useCallback(() => {
     if (mouseDown.current) {
       mouseDown.current = false;
       const ctx = canvas.current?.getContext("2d");
       ctx?.stroke();
     }
-  };
+  }, [canvas]);
 
   React.useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
     return () => {
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [handleMouseUp]);
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!mouseDown.current) return;
+  const handleMouseMove = React.useCallback(
+    (e: MouseEvent) => {
+      if (!canvas.current || !mouseDown.current) return;
 
-    const ctx = canvas.current?.getContext("2d");
-    if (!ctx) return;
+      const ctx = canvas.current.getContext("2d");
+      if (!ctx) return;
 
-    ctx.lineWidth = { small: 3, large: 10 }[toolState.size];
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = { pencil: "black", eraser: "white" }[toolState.tool];
+      ctx.lineWidth = { small: 3, large: 10 }[toolState.size];
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = { pencil: "black", eraser: "white" }[toolState.tool];
 
-    const rect = canvas.current!.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx?.stroke();
-  };
+      const rect = canvas.current.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx?.stroke();
+    },
+    [canvas, toolState]
+  );
 
   React.useEffect(() => {
-    canvas.current?.addEventListener("mousedown", handleMouseDown);
-    canvas.current?.addEventListener("mouseout", handleMouseUp);
-    canvas.current?.addEventListener("mousemove", handleMouseMove);
+    const cv = canvas.current;
+
+    cv?.addEventListener("mousedown", handleMouseDown);
+    cv?.addEventListener("mouseout", handleMouseUp);
+    cv?.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      canvas.current?.removeEventListener("mousedown", handleMouseDown);
-      canvas.current?.removeEventListener("mouseout", handleMouseUp);
-      canvas.current?.removeEventListener("mousemove", handleMouseMove);
+      cv?.removeEventListener("mousedown", handleMouseDown);
+      cv?.removeEventListener("mouseout", handleMouseUp);
+      cv?.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [toolState]);
+  }, [canvas, handleMouseDown, handleMouseMove, handleMouseUp, toolState]);
 };
 
 const useTextLayer = (
   canvasParent: React.RefObject<HTMLDivElement>,
   baseCanvas: React.RefObject<HTMLCanvasElement | undefined>
 ) => {
-  const cursorPos = React.useRef({ x: 105, y: 25 });
+  const INITIAL_CURSOR_POS = React.useMemo(() => ({ x: 105, y: 22 }), []);
+  const TEXT_HORZ_PADDING = 5;
+
+  const cursorPos = React.useRef(INITIAL_CURSOR_POS);
   const text = React.useRef<string[]>([]);
 
-  const textCanvas = usePersistentCanvas(canvasParent, 1, false);
+  const textCanvas = usePersistentCanvas(canvasParent, 20, false);
 
-  const renderText = () => {
+  const TEXT_LINE_HEIGHT = (textCanvas.current?.height || 0) / 5;
+
+  const renderText = React.useCallback(() => {
     const ctx = textCanvas.current?.getContext("2d");
-    if (!ctx) return;
+    if (!textCanvas.current || !ctx) return;
 
-    ctx.clearRect(0, 0, textCanvas.current!.width, textCanvas.current!.height);
+    ctx.clearRect(0, 0, textCanvas.current.width, textCanvas.current.height);
 
-    let charPos = Object.assign({}, cursorPos.current);
+    const charPos = Object.assign({}, cursorPos.current);
 
-    for (let char of text.current) {
+    for (const char of text.current) {
       if (char === "\n") {
-        charPos.x = 5;
-        charPos.y += 30;
+        charPos.x = TEXT_HORZ_PADDING;
+        charPos.y += TEXT_LINE_HEIGHT;
       } else {
         ctx.font = ctx.font.replace(/\d+px/, "20px");
         ctx.fillStyle = "black";
         const width = ctx.measureText(char).width;
-        if (charPos.x + width > textCanvas.current!.width) {
-          charPos.x = 5;
-          charPos.y += 30;
+        if (charPos.x + width > textCanvas.current.width - TEXT_HORZ_PADDING) {
+          charPos.x = TEXT_HORZ_PADDING;
+          charPos.y += TEXT_LINE_HEIGHT;
         }
         ctx.fillText(char, charPos.x, charPos.y);
         charPos.x += width;
       }
     }
-  };
+  }, [TEXT_LINE_HEIGHT, textCanvas]);
 
-  const blitDown = () => {
+  const blitDown = React.useCallback(() => {
     const destCtx = baseCanvas.current?.getContext("2d");
     if (!destCtx) return;
 
@@ -152,47 +170,48 @@ const useTextLayer = (
 
     destCtx.drawImage(textCanvas.current, 0, 0);
 
-    const srcCtx = textCanvas.current?.getContext("2d");
+    const srcCtx = textCanvas.current.getContext("2d");
     if (!srcCtx) return;
 
-    srcCtx.clearRect(
-      0,
-      0,
-      textCanvas.current!.width,
-      textCanvas.current!.height
-    );
-  };
+    srcCtx.clearRect(0, 0, textCanvas.current.width, textCanvas.current.height);
+  }, [baseCanvas, textCanvas]);
 
   return {
-    dispatchText: (char: string) => {
-      if (char.length === 1) {
-        text.current.push(char);
-        renderText();
-      } else if (char === "backspace") {
-        text.current.pop();
-        renderText();
-      }
-    },
-    dispatchAction: (action: { type: string; x?: number; y?: number }) => {
-      switch (action.type) {
-        case "clear":
-          text.current = [];
-          cursorPos.current = { x: 105, y: 25 };
+    dispatchText: React.useCallback(
+      (char: string) => {
+        if (char.length === 1) {
+          text.current.push(char);
           renderText();
-          break;
-        case "new":
-          blitDown();
-          text.current = [];
+        } else if (char === "backspace") {
+          text.current.pop();
           renderText();
+        }
+      },
+      [renderText]
+    ),
+    dispatchTextAction: React.useCallback(
+      (action: { type: string; x?: number; y?: number }) => {
+        switch (action.type) {
+          case "clear":
+            text.current = [];
+            cursorPos.current = INITIAL_CURSOR_POS;
+            renderText();
+            break;
+          case "new":
+            blitDown();
+            text.current = [];
+            renderText();
 
-          if (action.x === undefined || action.y === undefined) {
-            cursorPos.current = { x: 105, y: 25 };
-          } else {
-            cursorPos.current = { x: action.x, y: action.y };
-          }
-          break;
-      }
-    },
+            if (action.x === undefined || action.y === undefined) {
+              cursorPos.current = INITIAL_CURSOR_POS;
+            } else {
+              cursorPos.current = { x: action.x, y: action.y };
+            }
+            break;
+        }
+      },
+      [INITIAL_CURSOR_POS, blitDown, renderText]
+    ),
   };
 };
 
@@ -231,15 +250,22 @@ export default function MessageCompose({
   toolState,
   dispatch,
   onMessage,
+  currentMessage,
+  name,
 }: {
   toolState: ToolState;
   dispatch: ComposeEventDispatcher;
   onMessage: (message: MessageData) => void;
+  currentMessage: MessageData;
+  name: string;
 }) {
   const canvasParent = React.useRef<HTMLDivElement>(null);
-  const canvas = usePersistentCanvas(canvasParent);
+  const canvas = usePersistentCanvas(canvasParent, 10);
   useCanvasMouseEvents(canvas, toolState);
-  const { dispatchText, dispatchAction } = useTextLayer(canvasParent, canvas);
+  const { dispatchText, dispatchTextAction } = useTextLayer(
+    canvasParent,
+    canvas
+  );
 
   React.useEffect(() => {
     dispatch.current = (e: ComposeEvent) => {
@@ -250,13 +276,13 @@ export default function MessageCompose({
       switch (e.type) {
         case "clear":
           ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
-          dispatchAction({ type: "clear" });
+          dispatchTextAction({ type: "clear" });
           break;
         case "key":
           dispatchText(e.key);
           break;
-        case "send":
-          dispatchAction({ type: "new" });
+        case "send": {
+          dispatchTextAction({ type: "new" });
 
           const height = getMessageHeight(canvas.current);
 
@@ -273,22 +299,45 @@ export default function MessageCompose({
           if (data) {
             onMessage({
               type: "user",
-              author: "Brooke",
+              author: name,
               img: data,
               height,
             });
           }
 
-          ctx.clearRect(0, 0, canvas.current!.width, canvas.current!.height);
+          ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
           break;
+        }
+        case "copy": {
+          ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
+          dispatchTextAction({ type: "clear" });
+
+          if (currentMessage.type !== "user") break;
+
+          const image = new Image();
+          image.src = currentMessage.img;
+
+          image.onload = () => {
+            ctx.drawImage(image, 0, 0);
+          };
+          break;
+        }
         default:
           console.warn("Unknown compose event", e);
       }
     };
-  }, []);
+  }, [
+    canvas,
+    dispatch,
+    dispatchText,
+    dispatchTextAction,
+    onMessage,
+    currentMessage,
+    name,
+  ]);
 
   return (
-    <MessageBlock>
+    <MessageBlock lines author={name}>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -305,7 +354,7 @@ export default function MessageCompose({
             e.dataTransfer.getData("text")
           ).width;
 
-          dispatchAction({
+          dispatchTextAction({
             type: "new",
             x: e.clientX - canvasRect.left - (textWidth || 0) / 2,
             y: e.clientY - canvasRect.top + 10,

@@ -14,8 +14,16 @@ import { MessageData } from "../messages/Message";
 
 export default function Bottom({
   onMessage,
+  messages,
+  currentMessage,
+  setCurrentMessage,
+  name,
 }: {
   onMessage: (message: MessageData) => void;
+  messages: MessageData[];
+  currentMessage: number;
+  setCurrentMessage: React.Dispatch<React.SetStateAction<number>>;
+  name: string;
 }) {
   const [toolState, setToolState] = React.useState<ToolState>({
     tool: "pencil",
@@ -27,7 +35,12 @@ export default function Bottom({
 
   return (
     <Screen>
-      <DrawSidebar toolState={toolState} setToolState={setToolState} />
+      <DrawSidebar
+        toolState={toolState}
+        setToolState={setToolState}
+        setCurrentMessage={setCurrentMessage}
+        messages={messages}
+      />
       <div className="bg-white flex flex-col w-full">
         <div className="flex justify-end p-1">
           <Icon borderColor="border-black" backgroundColor="bg-gray-200">
@@ -39,6 +52,12 @@ export default function Bottom({
             toolState={toolState}
             dispatch={dispatchComposeEvent}
             onMessage={onMessage}
+            currentMessage={
+              messages[
+                currentMessage === -1 ? messages.length - 1 : currentMessage
+              ]
+            }
+            name={name}
           />
           <div className="flex gap-2">
             <Keyboard dispatch={dispatchComposeEvent} />

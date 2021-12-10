@@ -5,7 +5,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { ComposeEvent, ComposeEventDispatcher } from "./MessageCompose";
+import { ComposeEventDispatcher } from "./MessageCompose";
 
 function Button({
   children,
@@ -34,7 +34,7 @@ export default function MessageActions({
           <span className="text-base">SEND</span>
         </div>
       </Button>
-      <Button>
+      <Button onClick={() => dispatch.current?.({ type: "copy" })}>
         <FontAwesomeIcon icon={faDownload} />
         {/* https://en-americas-support.nintendo.com/app/answers/detail/a_id/4125/~/how-to-copy-and-use-a-previous-message-in-pictochat */}
       </Button>

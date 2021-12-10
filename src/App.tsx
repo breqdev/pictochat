@@ -1,47 +1,16 @@
 import React from "react";
-import Top from "./screens/Top";
-import Bottom from "./screens/Bottom";
-import { MessageData } from "./messages/Message";
+import Main from "./pages/Main";
+import Welcome from "./pages/Welcome";
 
 function App() {
-  const [messages, setMessages] = React.useState<MessageData[]>([
-    { type: "banner" },
-    { type: "join", author: "Brooke" },
-  ]);
+  const [name, setName] = React.useState("");
+  const [channel, setChannel] = React.useState("");
 
-  const socket = React.useRef<WebSocket>();
-
-  const initSocket = () => {
-    socket.current = new WebSocket("wss://chat.breq.dev/socket");
-    socket.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setMessages((messages) => [...messages, data]);
-    };
-
-    socket.current.onclose = () => {
-      setTimeout(() => {
-        initSocket();
-      }, 500);
-    };
-  };
-
-  React.useEffect(() => {
-    if (!socket.current) {
-      initSocket();
-    }
-  }, []);
-
-  const handleMessage = React.useCallback((message: MessageData) => {
-    // setMessages((messages) => [...messages, message]);
-    socket.current?.send(JSON.stringify(message));
-  }, []);
-
-  return (
-    <div className="bg-gray-400 h-full flex flex-col gap-4 justify-center">
-      <Top messages={messages} />
-      <Bottom onMessage={handleMessage} />
-    </div>
-  );
+  if (name === "" || channel === "") {
+    return <Welcome setName={setName} setChannel={setChannel} />;
+  } else {
+    return <Main name={name} channel={channel} />;
+  }
 }
 
 export default App;

@@ -21,41 +21,64 @@ export type MessageData =
   | JoinMessageData
   | UserMessageData;
 
-export function MessageBlock({
-  children,
-  height,
-}: {
-  children?: React.ReactNode;
-  height?: number;
-}) {
+function MessageBlockLines() {
   return (
-    <div
-      className={
-        "flex-shrink-0 rounded-xl bg-white border-2 border-blue-600 overflow-hidden relative"
-      }
-      style={{ height: `${(height || 5) * 36}px` }}
-    >
-      <div className="bg-blue-200 w-24 px-2 py-1 border-b-2 border-r-2 border-blue-600 rounded-br-xl text-blue-600 z-50 relative">
-        Brooke
-      </div>
-      {children}
+    <div className="absolute inset-0 flex flex-col justify-evenly">
+      {[...Array(4)].map((_, i) => (
+        <hr key={i} className="border-blue-200" />
+      ))}
     </div>
   );
 }
 
-export default function Message(props: MessageData) {
+export const MessageBlock = React.forwardRef(
+  (
+    {
+      children,
+      height,
+      lines,
+      author,
+    }: {
+      children?: React.ReactNode;
+      height?: number;
+      lines?: boolean;
+      author: string;
+    },
+    ref: React.Ref<HTMLDivElement>
+  ) => {
+    return (
+      <div
+        className={
+          "flex-shrink-0 rounded-xl bg-white border-2 border-blue-600 overflow-hidden relative"
+        }
+        style={{ height: `${(height || 5) * 36}px` }}
+        ref={ref}
+      >
+        <div className="bg-blue-200 w-24 px-2 py-1 border-b-2 border-r-2 border-blue-600 rounded-br-xl text-blue-600 z-50 relative">
+          {author}
+        </div>
+        {children}
+        {lines && <MessageBlockLines />}
+      </div>
+    );
+  }
+);
+
+const Message = React.forwardRef<HTMLDivElement, MessageData>((props, ref) => {
   switch (props.type) {
     case "banner":
-      return <Banner />;
+      return <Banner ref={ref} />;
     case "join":
-      return <Join author={props.author} />;
+      return <Join author={props.author} ref={ref} />;
     case "leave":
-      return <Join author={props.author} leave />;
+      return <Join author={props.author} leave ref={ref} />;
     case "user":
       return (
-        <MessageBlock height={props.height}>
+        <MessageBlock height={props.height} ref={ref} author={props.author}>
           <img src={props.img} className="absolute inset-0" />
         </MessageBlock>
       );
   }
-}
+});
+
+export default Message;
