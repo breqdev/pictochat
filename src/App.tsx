@@ -20,6 +20,12 @@ function App() {
       const data = JSON.parse(event.data);
       setMessages((messages) => [...messages, data]);
     };
+
+    socket.current.onclose = () => {
+      setTimeout(() => {
+        socket.current = new WebSocket("wss://chat.breq.dev/socket");
+      }, 500);
+    };
   }, []);
 
   const handleMessage = React.useCallback((message: MessageData) => {
