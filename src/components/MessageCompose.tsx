@@ -215,13 +215,13 @@ const useTextLayer = (
   };
 };
 
-const getMessageHeight = (canvas: HTMLCanvasElement) => {
+const getMessageOffsetHeight = (canvas: HTMLCanvasElement) => {
   const ctx = canvas.getContext("2d");
-  if (!ctx) return 0;
+  if (!ctx) return [0, 0];
 
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-  let height = 0;
+  const zonesUsed = [false, false, false, false, false];
 
   for (let i = 0; i < 5; ++i) {
     const zoneStart = (i * (canvas.height / 5)) | 0;
@@ -236,14 +236,17 @@ const getMessageHeight = (canvas: HTMLCanvasElement) => {
             imageData.data[index + 1] !== 255) &&
           imageData.data[index + 3] !== 0
         ) {
-          height = i;
+          zonesUsed[i] = true;
           break zoneLoop;
         }
       }
     }
   }
 
-  return height + 1;
+  const offset = zonesUsed.indexOf(true);
+  const height = zonesUsed.lastIndexOf(true) - offset + 1;
+
+  return [offset, height];
 };
 
 export default function MessageCompose({
@@ -284,7 +287,7 @@ export default function MessageCompose({
         case "send": {
           dispatchTextAction({ type: "new" });
 
-          const height = getMessageHeight(canvas.current);
+          const [offset, height] = getMessageOffsetHeight(canvas.current);
 
           const tempCanvas = document.createElement("canvas");
           tempCanvas.width = canvas.current.width;
@@ -293,7 +296,11 @@ export default function MessageCompose({
           const tempCtx = tempCanvas.getContext("2d");
           if (!tempCtx) return;
 
-          tempCtx.drawImage(canvas.current, 0, 0);
+          tempCtx.drawImage(
+            canvas.current,
+            0,
+            -canvas.current.height * (offset / 5)
+          );
 
           const data = tempCanvas.toDataURL("image/png");
           if (data) {

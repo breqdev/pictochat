@@ -6,9 +6,11 @@ import { MessageData } from "../messages/Message";
 export default function Main({
   name,
   channel,
+  socket,
 }: {
   name: string;
   channel: string;
+  socket: React.RefObject<WebSocket | undefined>;
 }) {
   const [messages, setMessages] = React.useState<MessageData[]>([
     { type: "banner" },
@@ -16,35 +18,26 @@ export default function Main({
   ]);
   const [currentMessage, setCurrentMessage] = React.useState(-1);
 
-  const socket = React.useRef<WebSocket>();
-
-  const initSocket = React.useCallback(() => {
-    socket.current = new WebSocket("wss://chat.breq.dev/socket");
-    socket.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setMessages((messages) => [...messages, data]);
-    };
-
-    socket.current.onclose = () => {
-      setTimeout(() => {
-        initSocket();
-      }, 500);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    if (!socket.current) {
-      initSocket();
-    }
-  }, [initSocket]);
-
   const handleMessage = React.useCallback(
     (message: MessageData) => {
       // setMessages((messages) => [...messages, message]);
-      socket.current?.send(JSON.stringify({ channel, ...message }));
+      socket.current?.send(
+        JSON.stringify({ type: "message", channel, message })
+      );
     },
-    [channel]
+    [channel, socket]
   );
+
+  React.useEffect(() => {
+    if (socket.current) {
+      socket.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "message") {
+          setMessages((messages) => [...messages, data.message]);
+        }
+      };
+    }
+  });
 
   return (
     <div className="bg-gray-400 h-full flex flex-col gap-4 justify-center">
