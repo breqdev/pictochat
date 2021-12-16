@@ -1,4 +1,5 @@
 import React from "react";
+import { Color, COLORS } from "./components/ColorPicker";
 import Main from "./pages/Main";
 import Welcome from "./pages/Welcome";
 
@@ -26,23 +27,41 @@ function useWebSocket() {
   return socket;
 }
 
+export type UserSettings = {
+  name: string;
+  channel: string;
+  color: Color;
+};
+
 function App() {
-  const [name, setName] = React.useState("");
-  const [channel, setChannel] = React.useState("");
+  const [settings, setSettings] = React.useState<UserSettings>({
+    name: "",
+    channel: "",
+    color: COLORS[0],
+  });
+  const [joined, setJoined] = React.useState(false);
 
   const socket = useWebSocket();
 
-  const onSetChannel = (channel: string) => {
-    setChannel(channel);
+  const joinChannel = React.useCallback(() => {
+    setJoined(true);
     if (socket.current) {
-      socket.current.send(JSON.stringify({ type: "join", channel }));
+      socket.current.send(
+        JSON.stringify({ type: "join", channel: settings.channel })
+      );
     }
-  };
+  }, [settings.channel, socket]);
 
-  if (name === "" || channel === "") {
-    return <Welcome setName={setName} setChannel={onSetChannel} />;
+  if (!joined) {
+    return (
+      <Welcome
+        settings={settings}
+        setSettings={setSettings}
+        joinChannel={joinChannel}
+      />
+    );
   } else {
-    return <Main name={name} channel={channel} socket={socket} />;
+    return <Main settings={settings} socket={socket} />;
   }
 }
 

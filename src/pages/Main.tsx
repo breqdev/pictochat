@@ -2,30 +2,28 @@ import React from "react";
 import Top from "../screens/Top";
 import Bottom from "../screens/Bottom";
 import { MessageData } from "../messages/Message";
+import { UserSettings } from "../App";
 
 export default function Main({
-  name,
-  channel,
+  settings,
   socket,
 }: {
-  name: string;
-  channel: string;
+  settings: UserSettings;
   socket: React.RefObject<WebSocket | undefined>;
 }) {
   const [messages, setMessages] = React.useState<MessageData[]>([
     { type: "banner" },
-    { type: "join", author: name, channel },
+    { type: "join", author: settings.name, channel: settings.channel },
   ]);
   const [currentMessage, setCurrentMessage] = React.useState(-1);
 
   const handleMessage = React.useCallback(
     (message: MessageData) => {
-      // setMessages((messages) => [...messages, message]);
       socket.current?.send(
-        JSON.stringify({ type: "message", channel, message })
+        JSON.stringify({ type: "message", channel: settings.channel, message })
       );
     },
-    [channel, socket]
+    [settings.channel, socket]
   );
 
   React.useEffect(() => {
@@ -47,7 +45,7 @@ export default function Main({
         messages={messages}
         currentMessage={currentMessage}
         setCurrentMessage={setCurrentMessage}
-        name={name}
+        settings={settings}
       />
     </div>
   );

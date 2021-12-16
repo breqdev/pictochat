@@ -8,7 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { MessageData } from "../messages/Message";
-import Icon from "./Icon";
+import { Color, PALETTES } from "./ColorPicker";
 import Sidebar from "./Sidebar";
 
 export interface ToolState {
@@ -24,18 +24,31 @@ function Toggle({
   active,
   onClick,
   children,
+  color,
 }: {
   active: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   children: React.ReactNode;
+  color: Color;
 }) {
   return (
-    <Icon
-      backgroundColor={active ? "bg-blue-600" : "bg-gray-400"}
+    <button
+      className="flex items-center justify-center  h-8 w-8"
       onClick={onClick}
+      style={
+        active
+          ? {
+              backgroundColor: PALETTES[color].bg,
+              color: PALETTES[color].fg,
+            }
+          : {
+              backgroundColor: "#6B7280",
+              color: "#ffffff",
+            }
+      }
     >
       {children}
-    </Icon>
+    </button>
   );
 }
 
@@ -44,16 +57,19 @@ export default function DrawSidebar({
   setToolState,
   setCurrentMessage,
   messages,
+  color,
 }: {
   toolState: ToolState;
   setToolState: (toolState: ToolState) => void;
   setCurrentMessage: React.Dispatch<React.SetStateAction<number>>;
   messages: MessageData[];
+  color: Color;
 }) {
   return (
     <Sidebar>
-      <Icon
-        backgroundColor="bg-gray-400"
+      <Toggle
+        color={color}
+        active={false}
         onClick={() =>
           setCurrentMessage((message) => {
             if (message === -1) {
@@ -67,9 +83,10 @@ export default function DrawSidebar({
         }
       >
         <FontAwesomeIcon icon={faCaretUp} />
-      </Icon>
-      <Icon
-        backgroundColor="bg-gray-400"
+      </Toggle>
+      <Toggle
+        color={color}
+        active={false}
         onClick={() =>
           setCurrentMessage((message) => {
             if (message === -1) {
@@ -83,15 +100,17 @@ export default function DrawSidebar({
         }
       >
         <FontAwesomeIcon icon={faCaretDown} />
-      </Icon>
+      </Toggle>
       <Divider />
       <Toggle
+        color={color}
         active={toolState.tool === "pencil"}
         onClick={() => setToolState({ ...toolState, tool: "pencil" })}
       >
         <FontAwesomeIcon icon={faPencilAlt} />
       </Toggle>
       <Toggle
+        color={color}
         active={toolState.tool === "eraser"}
         onClick={() => setToolState({ ...toolState, tool: "eraser" })}
       >
@@ -99,31 +118,35 @@ export default function DrawSidebar({
       </Toggle>
       <div className="flex-grow" />
       <Toggle
+        color={color}
         active={toolState.size === "large"}
         onClick={() => setToolState({ ...toolState, size: "large" })}
       >
         <FontAwesomeIcon icon={faCircle} />
       </Toggle>
       <Toggle
+        color={color}
         active={toolState.size === "small"}
         onClick={() => setToolState({ ...toolState, size: "small" })}
       >
         <FontAwesomeIcon icon={faCircle} className="text-[0.5rem]" />
       </Toggle>
       <Divider />
-      <Icon backgroundColor="bg-blue-600">A/1</Icon>
-      <Icon backgroundColor="bg-gray-400">
+      <Toggle color={color} active={true}>
+        A/1
+      </Toggle>
+      <Toggle color={color} active={false}>
         <span className="text-xl">À</span>
-      </Icon>
-      <Icon backgroundColor="bg-gray-400">
+      </Toggle>
+      <Toggle color={color} active={false}>
         <span className="text-xl">あ</span>
-      </Icon>
-      <Icon backgroundColor="bg-gray-400">
+      </Toggle>
+      <Toggle color={color} active={false}>
         <span className="text-xl">@</span>
-      </Icon>
-      <Icon backgroundColor="bg-gray-400">
+      </Toggle>
+      <Toggle color={color} active={false}>
         <span className="text-xl">☺</span>
-      </Icon>
+      </Toggle>
     </Sidebar>
   );
 }

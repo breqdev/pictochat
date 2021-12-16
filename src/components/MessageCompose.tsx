@@ -1,4 +1,5 @@
 import React from "react";
+import { UserSettings } from "../App";
 import { MessageBlock, MessageData } from "../messages/Message";
 import { ToolState } from "./DrawSidebar";
 
@@ -254,13 +255,13 @@ export default function MessageCompose({
   dispatch,
   onMessage,
   currentMessage,
-  name,
+  settings,
 }: {
   toolState: ToolState;
   dispatch: ComposeEventDispatcher;
   onMessage: (message: MessageData) => void;
   currentMessage: MessageData;
-  name: string;
+  settings: UserSettings;
 }) {
   const canvasParent = React.useRef<HTMLDivElement>(null);
   const canvas = usePersistentCanvas(canvasParent, 10);
@@ -306,7 +307,8 @@ export default function MessageCompose({
           if (data) {
             onMessage({
               type: "user",
-              author: name,
+              author: settings.name,
+              color: settings.color,
               img: data,
               height,
             });
@@ -340,11 +342,11 @@ export default function MessageCompose({
     dispatchTextAction,
     onMessage,
     currentMessage,
-    name,
+    settings,
   ]);
 
   return (
-    <MessageBlock lines author={name}>
+    <MessageBlock lines author={settings.name} color={settings.color}>
       <div
         onDragOver={(e) => {
           e.preventDefault();

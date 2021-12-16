@@ -11,19 +11,20 @@ import MessageCompose, {
   ComposeEventDispatcher,
 } from "../components/MessageCompose";
 import { MessageData } from "../messages/Message";
+import { UserSettings } from "../App";
 
 export default function Bottom({
   onMessage,
   messages,
   currentMessage,
   setCurrentMessage,
-  name,
+  settings,
 }: {
   onMessage: (message: MessageData) => void;
   messages: MessageData[];
   currentMessage: number;
   setCurrentMessage: React.Dispatch<React.SetStateAction<number>>;
-  name: string;
+  settings: UserSettings;
 }) {
   const [toolState, setToolState] = React.useState<ToolState>({
     tool: "pencil",
@@ -40,6 +41,7 @@ export default function Bottom({
         setToolState={setToolState}
         setCurrentMessage={setCurrentMessage}
         messages={messages}
+        color={settings.color}
       />
       <div className="bg-white flex flex-col w-full">
         <div className="flex justify-end p-1">
@@ -57,7 +59,7 @@ export default function Bottom({
                 currentMessage === -1 ? messages.length - 1 : currentMessage
               ]
             }
-            name={name}
+            settings={settings}
           />
           <div className="flex gap-2">
             <Keyboard dispatch={dispatchComposeEvent} />

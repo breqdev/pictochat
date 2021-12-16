@@ -6,6 +6,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ChangeEventHandler } from "react";
+import { UserSettings } from "../App";
+import ColorPicker, { Color, COLORS } from "../components/ColorPicker";
 
 function MenuPrompt({
   title,
@@ -49,15 +51,14 @@ function Input({
 }
 
 export default function Welcome({
-  setName,
-  setChannel,
+  settings,
+  setSettings,
+  joinChannel,
 }: {
-  setName: (name: string) => void;
-  setChannel: (channel: string) => void;
+  settings: UserSettings;
+  setSettings: (s: UserSettings) => void;
+  joinChannel: () => void;
 }) {
-  const [name, setNameState] = React.useState("Brooke");
-  const [channel, setChannelState] = React.useState("A");
-
   return (
     <div className="bg-gray-400 h-full flex items-center justify-center">
       <div className="bg-white p-8 rounded-3xl flex flex-col gap-4">
@@ -67,26 +68,33 @@ export default function Welcome({
           description="Enter your nickname."
           icon={faUserEdit}
         />
-        <Input value={name} onChange={(e) => setNameState(e.target.value)} />
+        <Input
+          value={settings.name}
+          onChange={(e) => setSettings({ ...settings, name: e.target.value })}
+        />
         <MenuPrompt
           title="Color"
           description="Select your favorite color."
           icon={faTh}
         />
-        <pre>coming soon...</pre>
+        <ColorPicker
+          color={settings.color}
+          setColor={(c) => setSettings({ ...settings, color: c })}
+        />
         <MenuPrompt
           title="Chat Room"
           description="Choose a Chat Room to join."
           icon={faPencilAlt}
         />
         <Input
-          value={channel}
-          onChange={(e) => setChannelState(e.target.value)}
+          value={settings.channel}
+          onChange={(e) =>
+            setSettings({ ...settings, channel: e.target.value })
+          }
         />
         <button
           onClick={() => {
-            setName(name);
-            setChannel(channel);
+            joinChannel();
           }}
           className="bg-gradient-to-b from-gray-300 to-gray-200 self-center py-1 px-12 flex gap-2 items-center"
         >
