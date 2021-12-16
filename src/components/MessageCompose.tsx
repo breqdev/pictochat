@@ -62,14 +62,16 @@ const useCanvasMouseEvents = (
   const mouseDown = React.useRef(false);
 
   const handleMouseDown = React.useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent | TouchEvent) => {
       mouseDown.current = true;
       const ctx = canvas.current?.getContext("2d");
       if (!canvas.current || !ctx) return;
 
+      const pos = "touches" in e ? e.changedTouches[0] : e;
+
       ctx.beginPath();
       const rect = canvas.current.getBoundingClientRect();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.moveTo(pos.clientX - rect.left, pos.clientY - rect.top);
     },
     [canvas]
   );
@@ -84,13 +86,17 @@ const useCanvasMouseEvents = (
 
   React.useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleMouseUp);
+    window.addEventListener("touchcancel", handleMouseUp);
     return () => {
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleMouseUp);
+      window.removeEventListener("touchcancel", handleMouseUp);
     };
   }, [handleMouseUp]);
 
   const handleMouseMove = React.useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent | TouchEvent) => {
       if (!canvas.current || !mouseDown.current) return;
 
       const ctx = canvas.current.getContext("2d");
@@ -101,8 +107,10 @@ const useCanvasMouseEvents = (
       ctx.lineJoin = "round";
       ctx.strokeStyle = { pencil: "black", eraser: "white" }[toolState.tool];
 
+      const pos = "touches" in e ? e.changedTouches[0] : e;
+
       const rect = canvas.current.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.lineTo(pos.clientX - rect.left, pos.clientY - rect.top);
       ctx?.stroke();
     },
     [canvas, toolState]
@@ -115,10 +123,20 @@ const useCanvasMouseEvents = (
     cv?.addEventListener("mouseout", handleMouseUp);
     cv?.addEventListener("mousemove", handleMouseMove);
 
+    cv?.addEventListener("touchstart", handleMouseDown);
+    cv?.addEventListener("touchend", handleMouseUp);
+    cv?.addEventListener("touchcancel", handleMouseUp);
+    cv?.addEventListener("touchmove", handleMouseMove);
+
     return () => {
       cv?.removeEventListener("mousedown", handleMouseDown);
       cv?.removeEventListener("mouseout", handleMouseUp);
       cv?.removeEventListener("mousemove", handleMouseMove);
+
+      cv?.removeEventListener("touchstart", handleMouseDown);
+      cv?.removeEventListener("touchend", handleMouseUp);
+      cv?.removeEventListener("touchcancel", handleMouseUp);
+      cv?.removeEventListener("touchmove", handleMouseMove);
     };
   }, [canvas, handleMouseDown, handleMouseMove, handleMouseUp, toolState]);
 };

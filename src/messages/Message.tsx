@@ -62,7 +62,7 @@ export const MessageBlock = React.forwardRef(
         ref={ref}
       >
         <div
-          className="w-24 px-2 py-1 border-b-2 border-r-2 rounded-br-xl z-50 relative"
+          className="min-w-24 w-max px-2 py-1 border-b-2 border-r-2 rounded-br-xl z-50 relative"
           style={{
             borderColor: fg,
             color: fg,
