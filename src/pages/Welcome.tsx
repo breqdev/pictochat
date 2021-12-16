@@ -7,7 +7,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ChangeEventHandler } from "react";
 import { UserSettings } from "../App";
-import ColorPicker, { Color, COLORS } from "../components/ColorPicker";
+import ColorPicker from "../components/ColorPicker";
 
 function MenuPrompt({
   title,

@@ -67,13 +67,25 @@ const useCanvasMouseEvents = (
       const ctx = canvas.current?.getContext("2d");
       if (!canvas.current || !ctx) return;
 
+      e.preventDefault();
+
       const pos = "touches" in e ? e.changedTouches[0] : e;
 
-      ctx.beginPath();
       const rect = canvas.current.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.arc(
+        pos.clientX - rect.left,
+        pos.clientY - rect.top,
+        { small: 3, large: 10 }[toolState.size] / 2,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+
+      ctx.beginPath();
       ctx.moveTo(pos.clientX - rect.left, pos.clientY - rect.top);
     },
-    [canvas]
+    [canvas, toolState]
   );
 
   const handleMouseUp = React.useCallback(() => {
