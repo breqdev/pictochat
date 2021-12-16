@@ -5,9 +5,11 @@ const Join = React.forwardRef(
     {
       author,
       leave,
+      channel,
     }: {
       author: string;
       leave?: boolean;
+      channel: string;
     },
     ref: React.Ref<HTMLDivElement>
   ) => (
@@ -17,7 +19,10 @@ const Join = React.forwardRef(
     >
       <span className="text-yellow-200">
         Now {leave ? "leaving " : "entering "}
-        <span className="border border-yellow-200 px-1 text-sm">A</span>:
+        <span className="border border-yellow-200 px-1 mr-px text-sm">
+          {channel}
+        </span>
+        :
       </span>
       <span className="text-gray-100"> {author}</span>
     </div>

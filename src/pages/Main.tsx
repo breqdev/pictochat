@@ -14,7 +14,7 @@ export default function Main({
 }) {
   const [messages, setMessages] = React.useState<MessageData[]>([
     { type: "banner" },
-    { type: "join", author: name },
+    { type: "join", author: name, channel },
   ]);
   const [currentMessage, setCurrentMessage] = React.useState(-1);
 

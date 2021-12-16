@@ -5,6 +5,7 @@ import Join from "./Join";
 type JoinMessageData = {
   type: "join" | "leave";
   author: string;
+  channel: string;
 };
 
 type UserMessageData = {
@@ -69,9 +70,11 @@ const Message = React.forwardRef<HTMLDivElement, MessageData>((props, ref) => {
     case "banner":
       return <Banner ref={ref} />;
     case "join":
-      return <Join author={props.author} ref={ref} />;
+      return <Join author={props.author} channel={props.channel} ref={ref} />;
     case "leave":
-      return <Join author={props.author} leave ref={ref} />;
+      return (
+        <Join author={props.author} channel={props.channel} leave ref={ref} />
+      );
     case "user":
       return (
         <MessageBlock height={props.height} ref={ref} author={props.author}>
