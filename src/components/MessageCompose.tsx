@@ -102,6 +102,8 @@ const useCanvasMouseEvents = (
       const ctx = canvas.current.getContext("2d");
       if (!ctx) return;
 
+      e.preventDefault();
+
       ctx.lineWidth = { small: 3, large: 10 }[toolState.size];
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
