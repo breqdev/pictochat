@@ -47,10 +47,14 @@ function App() {
     setJoined(true);
     if (socket.current) {
       socket.current.send(
-        JSON.stringify({ type: "join", channel: settings.channel })
+        JSON.stringify({
+          type: "join",
+          channel: settings.channel,
+          name: settings.name,
+        })
       );
     }
-  }, [settings.channel, socket]);
+  }, [settings.channel, settings.name, socket]);
 
   if (!joined) {
     return (
