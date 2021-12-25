@@ -113,7 +113,7 @@ export default function ColorPicker({
     document.addEventListener("keydown", handleKeyDown);
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  });
+  }, [color, setColor]);
 
   return (
     <div className="grid grid-cols-4 self-center gap-3 border-gray-300 focus-visible:border-black focus-visible:border-dashed outline-none border-4 px-4 py-1.5">

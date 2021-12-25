@@ -40,9 +40,18 @@ function Input({
   value: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
 }) {
+  const element = React.useRef<HTMLInputElement>(null);
+
+  // There is only ever one Input on the screen at a time, therefore it is okay
+  // for us to steal focus on mount.
+  React.useEffect(() => {
+    element.current?.focus();
+  }, []);
+
   return (
     <input
       type="text"
+      ref={element}
       className="bg-gray-600 text-white outline-none border-black focus:border-yellow-500 border-2 focus:border-4 focus:-my-0.5 py-1 px-2 w-64 mx-auto"
       value={value}
       onChange={onChange}
@@ -61,6 +70,22 @@ export default function Welcome({
 }) {
   const [page, setPage] = React.useState(0);
   const confirmButton = React.useRef<HTMLButtonElement>(null);
+
+  // We can't use a <input type="submit" /> because we need to draw the "(A)"
+  // icon inside the button. But we still need the form to be keyboard
+  // accessible. Thus, we approximate the behavior of the enter key ourselves.
+
+  React.useEffect(() => {
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        confirmButton.current?.click();
+      }
+    };
+
+    document.addEventListener("keydown", keyHandler);
+
+    return () => document.removeEventListener("keydown", keyHandler);
+  });
 
   return (
     <div className="bg-gray-400 h-full flex items-center justify-center">
