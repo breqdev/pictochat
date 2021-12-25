@@ -43,7 +43,7 @@ function Input({
   return (
     <input
       type="text"
-      className="bg-gray-600 text-white border-black border-2 py-1 px-2 w-64 mx-auto"
+      className="bg-gray-600 text-white outline-none border-black focus:border-yellow-500 border-2 focus:border-4 focus:-my-0.5 py-1 px-2 w-64 mx-auto"
       value={value}
       onChange={onChange}
     />
@@ -60,6 +60,7 @@ export default function Welcome({
   joinChannel: () => void;
 }) {
   const [page, setPage] = React.useState(0);
+  const confirmButton = React.useRef<HTMLButtonElement>(null);
 
   return (
     <div className="bg-gray-400 h-full flex items-center justify-center">
@@ -111,14 +112,16 @@ export default function Welcome({
           )}
         </div>
         <button
+          ref={confirmButton}
           onClick={() => {
+            confirmButton.current?.blur();
             if (page < 2) {
               setPage(page + 1);
             } else {
               joinChannel();
             }
           }}
-          className="bg-gradient-to-b from-gray-300 to-gray-200 self-center py-1 px-12 flex gap-2 items-center"
+          className="bg-gradient-to-b from-gray-300 to-gray-200 border-4 border-white focus-visible:border-black focus-visible:border-dashed outline-none self-center py-1 px-12 flex gap-2 items-center"
         >
           <div className="bg-black text-gray-200 rounded-full h-5 w-5 flex justify-center items-center text-sm">
             A
