@@ -92,17 +92,38 @@ export default function ColorPicker({
   color,
   setColor,
 }: {
-  color: string;
+  color: Color;
   setColor: (c: Color) => void;
 }) {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const focus = COLORS.indexOf(color);
+
+      if (e.key === "ArrowUp") {
+        setColor(COLORS[(focus + 12) % 16]);
+      } else if (e.key === "ArrowDown") {
+        setColor(COLORS[(focus + 4) % 16]);
+      } else if (e.key === "ArrowLeft") {
+        setColor(COLORS[(focus + 15) % 16]);
+      } else if (e.key === "ArrowRight") {
+        setColor(COLORS[(focus + 1) % 16]);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
   return (
-    <div className="grid grid-cols-4 self-center gap-3 border-gray-300 border-4 px-4 py-1.5">
+    <div className="grid grid-cols-4 self-center gap-3 border-gray-300 focus-visible:border-black focus-visible:border-dashed outline-none border-4 px-4 py-1.5">
       {COLORS.map((c) => (
         <button
           style={{ borderColor: color === c ? c : "#ffffff" }}
           className="border-dashed border-2 p-1.5"
           onClick={() => setColor(c)}
           key={c}
+          tabIndex={-1}
         >
           <div
             style={{ backgroundColor: c }}
