@@ -9,6 +9,12 @@ import React, { ChangeEventHandler } from "react";
 import { UserSettings } from "../App";
 import ColorPicker from "../components/ColorPicker";
 
+import welcome0 from "../sounds/welcome0.wav";
+import welcome1 from "../sounds/welcome1.wav";
+import welcome2 from "../sounds/welcome2.wav";
+
+const SOUNDS = [welcome0, welcome1, welcome2].map((s) => new Audio(s));
+
 function MenuPrompt({
   title,
   description,
@@ -139,6 +145,8 @@ export default function Welcome({
         <button
           ref={confirmButton}
           onClick={() => {
+            SOUNDS[page].play();
+
             confirmButton.current?.blur();
             if (page < 2) {
               setPage(page + 1);

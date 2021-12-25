@@ -5,6 +5,9 @@ import {
   faLongArrowAltLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { ComposeEventDispatcher } from "./MessageCompose";
+import keypressWav from "../sounds/keypress.wav";
+
+const keypressAudio = new Audio(keypressWav);
 
 const KEYS = [
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
@@ -39,6 +42,7 @@ export default function Keyboard({
   const [caps, setCaps] = React.useState(false);
 
   const makeDispatch = (key: string) => () => {
+    keypressAudio.play();
     setShifted(false);
     dispatch.current?.({ type: "key", key });
   };
@@ -69,6 +73,7 @@ export default function Keyboard({
               : "bg-gray-400 text-gray-700")
           }
           onClick={() => {
+            keypressAudio.play();
             setShifted(!shifted);
             setCaps(false);
           }}
@@ -85,6 +90,7 @@ export default function Keyboard({
             (caps ? "bg-blue-300 text-blue-600" : "bg-gray-400 text-gray-700")
           }
           onClick={() => {
+            keypressAudio.play();
             setCaps(!caps);
             setShifted(false);
           }}

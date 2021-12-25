@@ -3,6 +3,9 @@ import { UserSettings } from "../App";
 import { MessageBlock, MessageData } from "../messages/Message";
 import { ToolState } from "./DrawSidebar";
 
+import dropWav from "../sounds/drop.wav";
+const dropAudio = new Audio(dropWav);
+
 type ComposeKeyEvent = {
   type: "key";
   key: string;
@@ -386,6 +389,8 @@ export default function MessageCompose({
         }}
         onDrop={(e) => {
           e.preventDefault();
+
+          dropAudio.play();
 
           if (!canvas.current) return;
           const canvasRect = canvas.current.getBoundingClientRect();

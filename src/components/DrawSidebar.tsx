@@ -10,6 +10,9 @@ import React from "react";
 import { MessageData } from "../messages/Message";
 import { Color, PALETTES } from "./ColorPicker";
 import Sidebar from "./Sidebar";
+import scrollWav from "../sounds/scroll.wav";
+
+const scrollAudio = new Audio(scrollWav);
 
 export interface ToolState {
   tool: "pencil" | "eraser";
@@ -70,7 +73,8 @@ export default function DrawSidebar({
       <Toggle
         color={color}
         active={false}
-        onClick={() =>
+        onClick={() => {
+          scrollAudio.play();
           setCurrentMessage((message) => {
             if (message === -1) {
               return messages.length - 2;
@@ -79,15 +83,16 @@ export default function DrawSidebar({
             } else {
               return message - 1;
             }
-          })
-        }
+          });
+        }}
       >
         <FontAwesomeIcon icon={faCaretUp} />
       </Toggle>
       <Toggle
         color={color}
         active={false}
-        onClick={() =>
+        onClick={() => {
+          scrollAudio.play();
           setCurrentMessage((message) => {
             if (message === -1) {
               return -1;
@@ -96,8 +101,8 @@ export default function DrawSidebar({
             } else {
               return message + 1;
             }
-          })
-        }
+          });
+        }}
       >
         <FontAwesomeIcon icon={faCaretDown} />
       </Toggle>
