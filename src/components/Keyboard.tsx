@@ -11,18 +11,18 @@ const keypressAudio = new Audio(keypressWav);
 
 const KEYS = [
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
-  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "backspace"],
-  ["caps", "a", "s", "d", "f", "g", "h", "j", "k", "l", "enter"],
+  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "Backspace"],
+  ["caps", "a", "s", "d", "f", "g", "h", "j", "k", "l", "Enter"],
   ["shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
-  [";", "`", "space", "[", "]"],
+  [";", "`", "Space", "[", "]"],
 ];
 
 const SHIFTED = [
   ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+"],
-  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "backspace"],
-  ["caps", "A", "S", "D", "F", "G", "H", "J", "K", "L", "enter"],
+  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Backspace"],
+  ["caps", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Enter"],
   ["shift", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?"],
-  [":", "~", "space", "{", "}"],
+  [":", "~", "Space", "{", "}"],
 ];
 
 const MARGINS = [
@@ -41,11 +41,36 @@ export default function Keyboard({
   const [shifted, setShifted] = React.useState(false);
   const [caps, setCaps] = React.useState(false);
 
-  const makeDispatch = (key: string) => () => {
-    keypressAudio.play();
-    setShifted(false);
-    dispatch.current?.({ type: "key", key });
-  };
+  const makeDispatch = React.useCallback(
+    (key: string) => () => {
+      keypressAudio.play();
+      setShifted(false);
+      dispatch.current?.({ type: "key", key });
+    },
+    [dispatch]
+  );
+
+  React.useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === " ") {
+        e.preventDefault();
+      }
+
+      if (e.key === "Enter") {
+        dispatch.current?.({ type: "send" });
+      } else if (e.key === "Backspace") {
+        makeDispatch("Backspace")();
+      } else {
+        makeDispatch(e.key)();
+      }
+    };
+
+    window.addEventListener("keydown", listener);
+
+    return () => {
+      window.removeEventListener("keydown", listener);
+    };
+  }, [dispatch, makeDispatch]);
 
   const keyToButton = (key: string) => {
     if (key.length === 1) {
@@ -99,7 +124,7 @@ export default function Keyboard({
           {key}
         </button>
       );
-    } else if (key === "backspace") {
+    } else if (key === "Backspace") {
       return (
         <button
           className="bg-gray-400 text-gray-700 text-2xl h-8 flex-grow"
@@ -109,7 +134,7 @@ export default function Keyboard({
           <FontAwesomeIcon icon={faLongArrowAltLeft} />
         </button>
       );
-    } else if (key === "enter") {
+    } else if (key === "Enter") {
       return (
         <button
           className="bg-gray-400 font-bold text-gray-700 h-8 flex-grow uppercase text-xs"
@@ -123,7 +148,7 @@ export default function Keyboard({
           {key}
         </button>
       );
-    } else if (key === "space") {
+    } else if (key === "Space") {
       return (
         <button
           className="bg-gray-400 font-bold text-gray-700 h-8 flex-grow uppercase text-sm"
