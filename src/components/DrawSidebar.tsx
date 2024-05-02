@@ -19,6 +19,13 @@ export interface ToolState {
   size: "small" | "large";
 }
 
+export type Keyboard =
+  | "english"
+  | "latin-extended"
+  | "hiragana-katakana"
+  | "symbols"
+  | "emoji";
+
 function Divider() {
   return <hr className="border-2 border-dotted border-gray-700 -mx-1 my-0.5" />;
 }
@@ -61,12 +68,16 @@ export default function DrawSidebar({
   setCurrentMessage,
   messages,
   color,
+  keyboard,
+  setKeyboard,
 }: {
   toolState: ToolState;
   setToolState: (toolState: ToolState) => void;
   setCurrentMessage: React.Dispatch<React.SetStateAction<number>>;
   messages: MessageData[];
   color: Color;
+  keyboard: Keyboard;
+  setKeyboard: (keyboard: Keyboard) => void;
 }) {
   return (
     <Sidebar>
@@ -137,19 +148,39 @@ export default function DrawSidebar({
         <FontAwesomeIcon icon={faCircle} className="text-[0.5rem]" />
       </Toggle>
       <Divider />
-      <Toggle color={color} active={true}>
+      <Toggle
+        color={color}
+        active={keyboard === "english"}
+        onClick={() => setKeyboard("english")}
+      >
         A/1
       </Toggle>
-      <Toggle color={color} active={false}>
+      <Toggle
+        color={color}
+        active={keyboard === "latin-extended"}
+        onClick={() => setKeyboard("latin-extended")}
+      >
         <span className="text-xl">À</span>
       </Toggle>
-      <Toggle color={color} active={false}>
+      <Toggle
+        color={color}
+        active={keyboard === "hiragana-katakana"}
+        onClick={() => setKeyboard("hiragana-katakana")}
+      >
         <span className="text-xl">あ</span>
       </Toggle>
-      <Toggle color={color} active={false}>
+      <Toggle
+        color={color}
+        active={keyboard === "symbols"}
+        onClick={() => setKeyboard("symbols")}
+      >
         <span className="text-xl">@</span>
       </Toggle>
-      <Toggle color={color} active={false}>
+      <Toggle
+        color={color}
+        active={keyboard === "emoji"}
+        onClick={() => setKeyboard("emoji")}
+      >
         <span className="text-xl">☺</span>
       </Toggle>
     </Sidebar>

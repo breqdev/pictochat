@@ -4,7 +4,7 @@ import {
   faLevelDownAlt,
   faLongArrowAltLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { ComposeEventDispatcher } from "./MessageCompose";
+import { ComposeEventDispatcher } from "../components/MessageCompose";
 import keypressWav from "../sounds/keypress.wav";
 
 const keypressAudio = new Audio(keypressWav);
@@ -33,7 +33,7 @@ const MARGINS = [
   "ml-[5.5rem] mr-10",
 ];
 
-export default function Keyboard({
+export default function EnglishKeyboard({
   dispatch,
 }: {
   dispatch: ComposeEventDispatcher;

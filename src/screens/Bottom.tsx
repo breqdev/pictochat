@@ -1,17 +1,18 @@
-import React from "react";
+import React, { Key } from "react";
 import Screen from "./Screen";
-import Keyboard from "../components/Keyboard";
+import EnglishKeyboard from "../keyboards/English";
 import MessageActions from "../components/MessageActions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import Icon from "../components/Icon";
-import DrawSidebar, { ToolState } from "../components/DrawSidebar";
+import DrawSidebar, { Keyboard, ToolState } from "../components/DrawSidebar";
 import MessageCompose, {
   ComposeEvent,
   ComposeEventDispatcher,
 } from "../components/MessageCompose";
 import { MessageData } from "../messages/Message";
 import { UserSettings } from "../App";
+import LatinExtendedKeyboard from "../keyboards/LatinExtended";
 
 export default function Bottom({
   onMessage,
@@ -30,9 +31,20 @@ export default function Bottom({
     tool: "pencil",
     size: "large",
   });
+  const [keyboard, setKeyboard] = React.useState<Keyboard>("english");
   const dispatchComposeEvent = React.useRef<(e: ComposeEvent) => void>(
     () => {}
   ) as ComposeEventDispatcher;
+
+  const keyboards: Record<Keyboard, any> = {
+    ["english"]: EnglishKeyboard,
+    ["latin-extended"]: LatinExtendedKeyboard,
+    ["hiragana-katakana"]: () => <div />,
+    ["symbols"]: () => <div />,
+    ["emoji"]: () => <div />,
+  };
+
+  const KeyboardComponent = keyboards[keyboard];
 
   return (
     <Screen>
@@ -42,6 +54,8 @@ export default function Bottom({
         setCurrentMessage={setCurrentMessage}
         messages={messages}
         color={settings.color}
+        keyboard={keyboard}
+        setKeyboard={setKeyboard}
       />
       <div className="bg-white flex flex-col w-full">
         <div className="flex justify-end p-1">
@@ -62,7 +76,7 @@ export default function Bottom({
             settings={settings}
           />
           <div className="flex gap-2">
-            <Keyboard dispatch={dispatchComposeEvent} />
+            <KeyboardComponent dispatch={dispatchComposeEvent} />
             <MessageActions dispatch={dispatchComposeEvent} />
           </div>
         </div>
