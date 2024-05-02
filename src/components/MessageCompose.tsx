@@ -218,7 +218,7 @@ const useTextLayer = (
         if (char.length === 1) {
           text.current.push(char);
           renderText();
-        } else if (char === "backspace") {
+        } else if (char === "Backspace") {
           text.current.pop();
           renderText();
         }
