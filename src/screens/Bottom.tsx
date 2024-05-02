@@ -1,4 +1,4 @@
-import React, { Key } from "react";
+import React from "react";
 import Screen from "./Screen";
 import EnglishKeyboard from "../keyboards/English";
 import MessageActions from "../components/MessageActions";
@@ -13,6 +13,9 @@ import MessageCompose, {
 import { MessageData } from "../messages/Message";
 import { UserSettings } from "../App";
 import LatinExtendedKeyboard from "../keyboards/LatinExtended";
+import SymbolsKeyboard from "../keyboards/Symbols";
+import EmojiKeyboard from "../keyboards/Emoji";
+import HiraganaKatakanaKeyboard from "../keyboards/HiraganaKatakana";
 
 export default function Bottom({
   onMessage,
@@ -39,9 +42,9 @@ export default function Bottom({
   const keyboards: Record<Keyboard, any> = {
     ["english"]: EnglishKeyboard,
     ["latin-extended"]: LatinExtendedKeyboard,
-    ["hiragana-katakana"]: () => <div />,
-    ["symbols"]: () => <div />,
-    ["emoji"]: () => <div />,
+    ["hiragana-katakana"]: HiraganaKatakanaKeyboard,
+    ["symbols"]: SymbolsKeyboard,
+    ["emoji"]: EmojiKeyboard,
   };
 
   const KeyboardComponent = keyboards[keyboard];
